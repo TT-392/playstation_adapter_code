@@ -11,20 +11,20 @@ pico_sdk_init()
 
 if (TARGET tinyusb_device)
 # rest of your project
-    add_executable(blink
-        src/blink.c
+    add_executable(main
+        src/main.c
     )
 
-    target_include_directories(blink PRIVATE src/)
+    target_include_directories(main PRIVATE src/)
 
 # Add pico_stdlib library which aggregates commonly used features
-    target_link_libraries(blink pico_stdlib pico_bootrom pico_multicore)
+    target_link_libraries(main pico_stdlib pico_bootrom pico_multicore hardware_spi)
 
-    pico_enable_stdio_usb(blink 1)
-    pico_enable_stdio_uart(blink 0)
+    pico_enable_stdio_usb(main 1)
+    pico_enable_stdio_uart(main 0)
 
 # create map/bin/hex/uf2 file in addition to ELF.
-    pico_add_extra_outputs(blink)
+    pico_add_extra_outputs(main)
 
 elseif(PICO_ON_DEVICE)
     message(WARNING "not building hello_usb because TinyUSB submodule is not initialized in

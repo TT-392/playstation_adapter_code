@@ -14,6 +14,6 @@ then
     #$openocd_install_location/src/openocd -s $openocd_install_location/tcl -f openocd/flash.cfg
     picotool reboot -f -u
     sleep 1
-    picotool load build/blink.uf2
+    picotool load build/main.uf2
     picotool reboot
 fi
