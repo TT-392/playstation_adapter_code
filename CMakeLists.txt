@@ -13,6 +13,7 @@ if (TARGET tinyusb_device)
 # rest of your project
     add_executable(main
         src/main.c
+        src/spi.c
         src/tinyusb/usb.c
         src/tinyusb/usb_descriptors.c
     )
