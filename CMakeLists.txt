@@ -13,12 +13,14 @@ if (TARGET tinyusb_device)
 # rest of your project
     add_executable(main
         src/main.c
+        src/tinyusb/usb.c
+        src/tinyusb/usb_descriptors.c
     )
 
-    target_include_directories(main PRIVATE src/)
+    target_include_directories(main PRIVATE src src/tinyusb)
 
 # Add pico_stdlib library which aggregates commonly used features
-    target_link_libraries(main pico_stdlib pico_bootrom pico_multicore hardware_spi)
+    target_link_libraries(main pico_stdlib pico_bootrom tinyusb_device tinyusb_board pico_multicore hardware_spi)
 
     pico_enable_stdio_usb(main 1)
     pico_enable_stdio_uart(main 0)

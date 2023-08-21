@@ -3,6 +3,8 @@
 #include "pico/bootrom.h"
 #include "hardware/spi.h"
 #include "pins.h"
+#include "usb.h"
+#include "tusb.h"
 
 #define ACK_SUCCESS true
 #define ACK_FAIL false
@@ -28,11 +30,12 @@ bool wait_for_ack() {
 }
 
 int main() {
-    stdio_init_all(); // otherwise picotool reboot won't work
-    while (!stdio_usb_connected()) {
-        sleep_ms(500);
-    }
-    printf("new\n");
+//    stdio_init_all(); // otherwise picotool reboot won't work
+//    while (!stdio_usb_connected()) {
+//        sleep_ms(500);
+//    }
+    //printf("new\n");
+    usb_init();
 
     gpio_set_function(PIN_DATA, GPIO_FUNC_SPI);
 
@@ -96,23 +99,31 @@ int main() {
         out = 0x00;
         spi_write_read_blocking(spi0, &out, &data2, 1);
 
-        if ((data1 & 0x80) == 0 && (prev_data1 & 0x80))
-            printf("select\n");
+        uint8_t pressed_keys[6] = {};
 
-        if ((data1 & 0x10) == 0 && (prev_data1 & 0x10))
-            printf("start\n");
+        if ((data1 & 0x80) == 0)
+            pressed_keys[0] = HID_KEY_ESCAPE;
 
-        if ((data1 & 0x01) == 0 && (prev_data1 & 0x01))
-            printf("center left\n");
+        if ((data1 & 0x10) == 0)
+            pressed_keys[1] = HID_KEY_ENTER;
 
-        if ((data2 & 0x20) == 0 && (prev_data2 & 0x20))
-            printf("ring left\n");
+        if ((data1 & 0x01) == 0)
+            pressed_keys[2] = HID_KEY_F;
 
-        if ((data2 & 0x04) == 0 && (prev_data2 & 0x04))
-            printf("center right\n");
+        if ((data2 & 0x20) == 0)
+            pressed_keys[3] = HID_KEY_D;
+
+        if ((data2 & 0x04) == 0)
+            pressed_keys[4] = HID_KEY_J;
         
-        if ((data2 & 0x10) == 0 && (prev_data2 & 0x10))
-            printf("ring right\n");
+        if ((data2 & 0x10) == 0)
+            pressed_keys[4] = HID_KEY_K;
+
+
+        if (prev_data1 != data1 || prev_data2 != data2)
+            keyboard_update(0, pressed_keys);
+
+
 
         prev_data1 = data1;
         prev_data2 = data2;
@@ -121,6 +132,8 @@ int main() {
         sleep_us(100);
         gpio_put(PIN_ATTENTION, 1);
         sleep_us(100);
+        
+        usb_task();
     }
 }
 
