@@ -31,11 +31,6 @@ bool wait_for_ack() {
 }
 
 int main() {
-//    stdio_init_all(); // otherwise picotool reboot won't work
-//    while (!stdio_usb_connected()) {
-//        sleep_ms(500);
-//    }
-    //printf("new\n");
     usb_init();
 
     gpio_init(PIN_ACK);
