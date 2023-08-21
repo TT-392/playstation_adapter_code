@@ -55,12 +55,11 @@ int main() {
 
     universal_spi_init(spi_config);
 
-    gpio_init(25);
-    gpio_set_dir(25, GPIO_OUT);
-
     uint8_t prev_data1;
     uint8_t prev_data2;
     while (1) {
+        usb_task();
+
         uint8_t in;
         uint8_t data1 = 0xaa;
         uint8_t data2 = 0xaa;
@@ -134,8 +133,6 @@ int main() {
         sleep_us(100);
         gpio_put(PIN_ATTENTION, 1);
         sleep_us(100);
-        
-        usb_task();
     }
 }
 
