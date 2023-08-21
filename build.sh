@@ -1,5 +1,5 @@
-#!/bin/bash
-PICO_SDK_PATH=../sdk/
+#!/bin/sh
+export PICO_SDK_PATH=../sdk/
 openocd_install_location=$HOME"/applications/openocd_rp2040/openocd"
 
 mkdir -p build && cd build
