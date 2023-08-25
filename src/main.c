@@ -54,7 +54,6 @@ int main() {
     uint8_t prev_data2;
     while (1) {
         usb_task();
-        continue;
 
         uint8_t in;
         uint8_t data1 = 0xaa;

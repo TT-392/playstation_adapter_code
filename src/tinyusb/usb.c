@@ -18,12 +18,12 @@ void usb_init() {
 void usb_task() {
     tud_task();
 
-//    if (tud_connected()) {
-//        if (tud_cdc_available()) {
-//            tud_cdc_write_flush();
-//            handle_cdc_input();
-//        }
-//    }
+    if (tud_connected()) {
+        if (tud_cdc_available()) {
+            tud_cdc_write_flush();
+            handle_cdc_input();
+        }
+    }
 }
 
 bool usb_connected() {
@@ -43,28 +43,28 @@ void cdc_get_line(char buffer[INPUT_MAX_LEN + 1]) { // INPUT_MAX_LEN + 1 is 101
 }
 
 static void handle_cdc_input() {
-//    uint8_t inbuf[64];
-//    uint32_t inlen = tud_cdc_n_read(ITF_NUM_CDC, inbuf, sizeof(inbuf));
-//
-//    static char buffer[INPUT_MAX_LEN + 1] = "";
-//    static int ind = 0;
-//
-//    for (int i = 0; i < inlen; i++) {
-//        char c = inbuf[i];
-//        if (c == '\n') {
-//            buffer[ind++] = '\0';
-//
-//            if (strcmp(buffer, "reset") == 0) {
-//                reset_usb_boot(0, 0);
-//            }
-//
-//            strcpy(received_data, buffer);
-//            ind = 0;
-//        } else if (c != '\r') {
-//            if (ind < INPUT_MAX_LEN)
-//                buffer[ind++] = c;
-//        }
-//    }
+    uint8_t inbuf[64];
+    uint32_t inlen = tud_cdc_n_read(ITF_NUM_CDC, inbuf, sizeof(inbuf));
+
+    static char buffer[INPUT_MAX_LEN + 1] = "";
+    static int ind = 0;
+
+    for (int i = 0; i < inlen; i++) {
+        char c = inbuf[i];
+        if (c == '\n') {
+            buffer[ind++] = '\0';
+
+            if (strcmp(buffer, "reset") == 0) {
+                reset_usb_boot(0, 0);
+            }
+
+            strcpy(received_data, buffer);
+            ind = 0;
+        } else if (c != '\r') {
+            if (ind < INPUT_MAX_LEN)
+                buffer[ind++] = c;
+        }
+    }
 }
 
 void keyboard_update(uint8_t modifiers, uint8_t key_codes[6]) {
@@ -109,22 +109,22 @@ static char* replace_lf_with_crlf_allocate_and_free(char* buffer) {
 }
 
 void cdc_printf(const char *format, ...) {
-//    va_list args;
-//    va_start(args, format);
-//    size_t len = vsnprintf(NULL, 0, format, args);
-//
-//    char *buffer = malloc(len + 1);
-//
-//    va_start(args, format);
-//    vsprintf(buffer, format, args);
-//    va_end(args);
-//
-//    buffer = replace_lf_with_crlf_allocate_and_free(buffer);
-//
-//    tud_cdc_write_str(buffer);
-//    tud_cdc_write_flush();
-//
-//    free(buffer);
+    va_list args;
+    va_start(args, format);
+    size_t len = vsnprintf(NULL, 0, format, args);
+
+    char *buffer = malloc(len + 1);
+
+    va_start(args, format);
+    vsprintf(buffer, format, args);
+    va_end(args);
+
+    buffer = replace_lf_with_crlf_allocate_and_free(buffer);
+
+    tud_cdc_write_str(buffer);
+    tud_cdc_write_flush();
+
+    free(buffer);
 }
 
 

@@ -31,5 +31,17 @@ enum
   REPORT_ID_COUNT
 };
 
+//--------------------------------------------------------------------+
+// Configuration Descriptor
+//--------------------------------------------------------------------+
+
+enum
+{
+  ITF_NUM_CDC = 0,
+  ITF_NUM_CDC_DATA,
+  ITF_NUM_HID,
+  ITF_NUM_TOTAL
+};
+
 
 #endif /* USB_DESCRIPTORS_H_ */
