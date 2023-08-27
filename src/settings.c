@@ -1,30 +1,24 @@
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 #include "settings.h"
+#include "keybinds.h"
 #include "usb.h"
 #include "utils.h"
 #include "tusb.h"
 #include "drum.h"
 
-volatile settings_t settings = {
-    .ring_left = HID_KEY_D,
-    .ring_right = HID_KEY_K,
-    .center_left = HID_KEY_F,
-    .center_right = HID_KEY_J,
-    .select = HID_KEY_ESCAPE,
-    .start = HID_KEY_ENTER,
-};
-
 static void settings_process() {
     int i = 0;
+    keybinds_t keybinds = keybinds_get();
+
     printf("Welcome to the 太鼓 drum setup utility\n");
     printf("Your current settings are as follows:\n");
-    printf("Ring left: %s\n", key_to_string(settings.ring_left));
-    printf("Ring right: %s\n", key_to_string(settings.ring_right));
-    printf("Center left: %s\n", key_to_string(settings.center_left));
-    printf("Center right: %s\n", key_to_string(settings.center_right));
-    printf("start: %s\n", key_to_string(settings.start));
-    printf("select: %s\n", key_to_string(settings.select));
+    printf("Ring left: %s\n", key_to_string(keybinds.ring_left));
+    printf("Ring right: %s\n", key_to_string(keybinds.ring_right));
+    printf("Center left: %s\n", key_to_string(keybinds.center_left));
+    printf("Center right: %s\n", key_to_string(keybinds.center_right));
+    printf("start: %s\n", key_to_string(keybinds.start));
+    printf("select: %s\n", key_to_string(keybinds.select));
 
 
     char *ring_left = "ring left";
@@ -35,8 +29,9 @@ static void settings_process() {
     char *start = "select";
 
     while (1) {
-        volatile uint8_t *active_setting;
+        volatile uint8_t *active_keybind;
         char *button_string;
+
 
         printf("Hit/push the zone/button you want to rebind\n");
         while (1) {
@@ -44,27 +39,27 @@ static void settings_process() {
 
             if (drum.ring_left) {
                 button_string = ring_left;
-                active_setting = &settings.ring_left;
+                active_keybind = &keybinds.ring_left;
                 break;
             } if (drum.ring_right) {
                 button_string = ring_right;
-                active_setting = &settings.ring_right;
+                active_keybind = &keybinds.ring_right;
                 break;
             } if (drum.center_left) {
                 button_string = center_left;
-                active_setting = &settings.center_left;
+                active_keybind = &keybinds.center_left;
                 break;
             } if (drum.center_right) {
                 button_string = center_right;
-                active_setting = &settings.center_right;
+                active_keybind = &keybinds.center_right;
                 break;
             } if (drum.select) {
                 button_string = select;
-                active_setting = &settings.select;
+                active_keybind = &keybinds.select;
                 break;
             } if (drum.start) {
                 button_string = start;
-                active_setting = &settings.start;
+                active_keybind = &keybinds.start;
                 break;
             }
         }
@@ -76,9 +71,12 @@ static void settings_process() {
         int key = string_to_key(buffer);
 
         if (key != -1) {
-            printf("%c%s: %s -> %s\n", button_string[0] - ('a'-'A'), button_string + 1, key_to_string(*active_setting), key_to_string(key));
+            printf("%c%s: %s -> %s\n", button_string[0] - ('a'-'A'), button_string + 1, key_to_string(*active_keybind), key_to_string(key));
 
-            *active_setting = key;
+            *active_keybind = key;
+
+            keybinds_write(keybinds);
+            printf("New keybind successfully written to flash storage.\n\n");
         } else {
             printf("Error, unknown key: %s\n", buffer);
         }
