@@ -20,7 +20,12 @@ void keyboard_update(uint8_t modifiers, uint8_t key_codes[6]);
 
 static char* replace_lf_with_crlf_allocate_and_free(char* buffer);
 
-void cdc_printf(const char *format, ...);
+int cdc_printf(const char *format, ...);
+
+bool usb_cdc_connected();
+
+void usb_cdc_read_string_capitalized(char* buffer, int length);
 
 
+#define printf cdc_printf
 

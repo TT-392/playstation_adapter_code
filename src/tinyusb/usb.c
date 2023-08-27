@@ -7,8 +7,6 @@
 #include "pico/bootrom.h"
 #include "usb.h"
 
-#define printf cdc_printf
-
 static void handle_cdc_input();
 
 void usb_init() {
@@ -21,9 +19,14 @@ void usb_task() {
     if (tud_connected()) {
         if (tud_cdc_available()) {
             tud_cdc_write_flush();
-            handle_cdc_input();
+            // Reset functionality disabled for now, can't read other data with this
+            //handle_cdc_input();
         }
     }
+}
+
+bool usb_cdc_connected() {
+    return tud_cdc_connected();
 }
 
 bool usb_connected() {
@@ -40,6 +43,44 @@ bool cdc_data_available() {
 void cdc_get_line(char buffer[INPUT_MAX_LEN + 1]) { // INPUT_MAX_LEN + 1 is 101
     memcpy(buffer, received_data, INPUT_MAX_LEN + 1);
     received_data[0] = '\0';
+}
+
+char to_upper(char input) {
+    if (input >= 'a' && input <= 'z') {
+        input -= ('a' - 'A');
+    }
+    return input;
+}
+
+void usb_cdc_read_string_capitalized(char* buffer, int length) {
+    int index = 0; 
+
+    tud_cdc_read_flush();
+    while (1) {
+        int32_t input = tud_cdc_n_read_char(ITF_NUM_CDC);
+
+        if (input != -1) {
+            if ((char)input == '\r' || (char)input == '\n') {
+                break;
+            }
+
+            if (index < length -1) {
+                char ch = to_upper(input);
+                tud_cdc_n_write_char(ITF_NUM_CDC, ch);
+
+                buffer[index] = ch;
+
+                index++;
+                tud_cdc_write_flush();
+            } else break;
+        } 
+    }
+
+    buffer[index] = '\0';
+
+    tud_cdc_write_str("\r\n");
+    tud_cdc_write_flush();
+    
 }
 
 static void handle_cdc_input() {
@@ -108,7 +149,7 @@ static char* replace_lf_with_crlf_allocate_and_free(char* buffer) {
     return retval;
 }
 
-void cdc_printf(const char *format, ...) {
+int cdc_printf(const char *format, ...) {
     va_list args;
     va_start(args, format);
     size_t len = vsnprintf(NULL, 0, format, args);
@@ -121,10 +162,16 @@ void cdc_printf(const char *format, ...) {
 
     buffer = replace_lf_with_crlf_allocate_and_free(buffer);
 
-    tud_cdc_write_str(buffer);
-    tud_cdc_write_flush();
+    int i = 0; // for whatever reason, this works way better than the write_str functions
+    while (buffer[i] != '\0') {
+        tud_cdc_n_write_char(ITF_NUM_CDC, buffer[i]);
+        tud_cdc_write_flush();
+        i++;
+    }
 
     free(buffer);
+
+    tud_task();
 }
 
 
