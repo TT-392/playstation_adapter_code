@@ -116,11 +116,5 @@ drum_t drum_read() {
     if ((data2 & 0x10) == 0)
         drum.ring_right = true;
 
-    volatile static uint8_t last_data1 = 0;
-    volatile static uint8_t last_data2 = 0;
-
-    last_data1 = data1;
-    last_data2 = data2;
-
     return drum;
 }

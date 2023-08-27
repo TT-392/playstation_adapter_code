@@ -7,8 +7,6 @@
 #include "pico/bootrom.h"
 #include "usb.h"
 
-static void handle_cdc_input();
-
 void usb_init() {
     tusb_init();
 }
@@ -20,7 +18,6 @@ void usb_task() {
         if (tud_cdc_available()) {
             tud_cdc_write_flush();
             // Reset functionality disabled for now, can't read other data with this
-            //handle_cdc_input();
         }
     }
 }
@@ -83,31 +80,6 @@ void usb_cdc_read_string_capitalized(char* buffer, int length) {
     
 }
 
-static void handle_cdc_input() {
-    uint8_t inbuf[64];
-    uint32_t inlen = tud_cdc_n_read(ITF_NUM_CDC, inbuf, sizeof(inbuf));
-
-    static char buffer[INPUT_MAX_LEN + 1] = "";
-    static int ind = 0;
-
-    for (int i = 0; i < inlen; i++) {
-        char c = inbuf[i];
-        if (c == '\n') {
-            buffer[ind++] = '\0';
-
-            if (strcmp(buffer, "reset") == 0) {
-                reset_usb_boot(0, 0);
-            }
-
-            strcpy(received_data, buffer);
-            ind = 0;
-        } else if (c != '\r') {
-            if (ind < INPUT_MAX_LEN)
-                buffer[ind++] = c;
-        }
-    }
-}
-
 void keyboard_update(uint8_t modifiers, uint8_t key_codes[6]) {
     // Remote wakeup
     if (tud_suspended()) {
@@ -129,7 +101,7 @@ static char* replace_lf_with_crlf_allocate_and_free(char* buffer) {
     // OPTIMIZATION: using strtok and strcpy could theoretically maybe make things slightly faster, but I was being lazy, not a very high priority
    
     int count = 0;
-    for (int i = 0; i < strlen(buffer); i++) {
+    for (size_t i = 0; i < strlen(buffer); i++) {
         if (buffer[i] == '\n') {
             count++;
         }
@@ -138,7 +110,7 @@ static char* replace_lf_with_crlf_allocate_and_free(char* buffer) {
     char* retval = malloc(count + strlen(buffer) + 1); // UNSAFE: check if malloc failed
     int j = 0;
 
-    for (int i = 0; i < strlen(buffer) + 1; i++) {
+    for (size_t i = 0; i < strlen(buffer) + 1; i++) {
         if (buffer[i] == '\n') {
             retval[j++] = '\r';
         } 
@@ -172,21 +144,23 @@ int cdc_printf(const char *format, ...) {
     free(buffer);
 
     tud_task();
+
+    return 0;
 }
 
 
 
 // Invoked when sent REPORT successfully to host
-void tud_hid_report_complete_cb(uint8_t instance, uint8_t const *report, uint16_t len) {
+void tud_hid_report_complete_cb(__attribute__((unused)) uint8_t instance,__attribute__((unused))  uint8_t const *report,__attribute__((unused))  uint16_t len) {
 }
 
 // Invoked when received GET_REPORT control request
-uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer, uint16_t reqlen) {
+uint16_t tud_hid_get_report_cb(__attribute__((unused)) uint8_t instance,__attribute__((unused))  uint8_t report_id,__attribute__((unused))  hid_report_type_t report_type,__attribute__((unused))  uint8_t *buffer,__attribute__((unused))  uint16_t reqlen) {
     return 0;
 }
 
 // Invoked when received SET_REPORT control request or
-void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer, uint16_t bufsize) {
+void tud_hid_set_report_cb(__attribute__((unused)) uint8_t instance, __attribute__((unused)) uint8_t report_id, __attribute__((unused)) hid_report_type_t report_type, __attribute__((unused)) uint8_t const *buffer, __attribute__((unused)) uint16_t bufsize) {
 }
 
 

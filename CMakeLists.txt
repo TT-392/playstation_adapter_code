@@ -9,6 +9,8 @@ project(my_project)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+add_compile_options(-Wall -Wextra -Wnull-dereference)
+
 if (TARGET tinyusb_device)
 # rest of your project
     add_executable(main

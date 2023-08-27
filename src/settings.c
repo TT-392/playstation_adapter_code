@@ -8,7 +8,6 @@
 #include "drum.h"
 
 static void settings_process() {
-    int i = 0;
     keybinds_t keybinds = keybinds_get();
 
     printf("Welcome to the 太鼓 drum setup utility\n");

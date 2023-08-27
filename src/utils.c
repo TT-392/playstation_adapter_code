@@ -184,7 +184,7 @@ char *keystrings[] = {
 
 
 int string_to_key(char* string) {
-    for (int i = 0; i < (sizeof(keystrings) / sizeof(keystrings[0])); i++) {
+    for (size_t i = 0; i < (sizeof(keystrings) / sizeof(keystrings[0])); i++) {
         if (strcmp(keystrings[i], string) == 0)
             return i;
     }

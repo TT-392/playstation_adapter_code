@@ -15,8 +15,6 @@ int main() {
     keybinds_init();
 
 
-    uint8_t prev_data1;
-    uint8_t prev_data2;
     bool settings_active = false;
     while (1) {
         usb_task();
