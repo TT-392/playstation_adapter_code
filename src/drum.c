@@ -4,8 +4,6 @@
 #include "usb.h"
 #include "drum.h"
 
-volatile drum_t drum = {0};
-
 static const spi_config_t spi_config = {
     .MISO = PIN_DATA,
     .MOSI = PIN_CMD,
@@ -50,7 +48,9 @@ void drum_init() {
     universal_spi_init(spi_config);
 }
 
-void drum_read() {
+static drum_t drum = {};
+
+drum_t drum_read() {
     uint8_t in;
     uint8_t data1 = 0xaa;
     uint8_t data2 = 0xaa;
@@ -61,7 +61,7 @@ void drum_read() {
 
     if (wait_for_ack() == ACK_FAIL) {
         gpio_put(PIN_ATTENTION, 1);
-        return;
+        return drum;
     }
 
     out = 0x42;
@@ -69,7 +69,7 @@ void drum_read() {
 
     if (wait_for_ack() == ACK_FAIL) {
         gpio_put(PIN_ATTENTION, 1);
-        return;
+        return drum;
     }
 
     out = 0x00;
@@ -77,7 +77,7 @@ void drum_read() {
 
     if (wait_for_ack() == ACK_FAIL) {
         gpio_put(PIN_ATTENTION, 1);
-        return;
+        return drum;
     }
 
     out = 0x00;
@@ -85,36 +85,42 @@ void drum_read() {
 
     if (wait_for_ack() == ACK_FAIL) {
         gpio_put(PIN_ATTENTION, 1);
-        return;
+        return drum;
     }
 
     out = 0x00;
     universal_spi_write_read_blocking(spi_config, &out, &data2, 1);
 
 
-    drum_t newdrum = {};
-
-    if ((data1 & 0x80) == 0)
-        newdrum.select = true;
-
-    if ((data1 & 0x10) == 0)
-        newdrum.start = true;
-
-    if ((data1 & 0x01) == 0)
-        newdrum.center_left = true;
-
-    if ((data2 & 0x20) == 0)
-        newdrum.ring_left = true;
-
-    if ((data2 & 0x04) == 0)
-        newdrum.center_right = true;
-
-    if ((data2 & 0x10) == 0)
-        newdrum.ring_right = true;
-
-    drum = newdrum;
-
     sleep_us(100);
     gpio_put(PIN_ATTENTION, 1);
     sleep_us(100);
+
+    drum = (drum_t){0};
+
+    if ((data1 & 0x80) == 0)
+        drum.select = true;
+
+    if ((data1 & 0x10) == 0)
+        drum.start = true;
+
+    if ((data1 & 0x01) == 0)
+        drum.center_left = true;
+
+    if ((data2 & 0x20) == 0)
+        drum.ring_left = true;
+
+    if ((data2 & 0x04) == 0)
+        drum.center_right = true;
+
+    if ((data2 & 0x10) == 0)
+        drum.ring_right = true;
+
+    volatile static uint8_t last_data1 = 0;
+    volatile static uint8_t last_data2 = 0;
+
+    last_data1 = data1;
+    last_data2 = data2;
+
+    return drum;
 }

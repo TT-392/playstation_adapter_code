@@ -12,3 +12,5 @@ typedef struct {
 void settings_start();
 
 void settings_kill();
+
+volatile extern settings_t settings;

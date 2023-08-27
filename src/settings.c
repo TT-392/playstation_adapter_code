@@ -40,6 +40,8 @@ static void settings_process() {
 
         printf("Hit/push the zone/button you want to rebind\n");
         while (1) {
+            drum_t drum = drum_read();
+
             if (drum.ring_left) {
                 button_string = ring_left;
                 active_setting = &settings.ring_left;

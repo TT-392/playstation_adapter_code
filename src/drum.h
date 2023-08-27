@@ -12,6 +12,4 @@ typedef struct {
 
 void drum_init();
 
-void drum_read();
-
-volatile extern drum_t drum;
+drum_t drum_read();
