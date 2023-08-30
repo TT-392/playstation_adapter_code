@@ -13,7 +13,7 @@ add_compile_options(-Wall -Wextra -Wnull-dereference)
 
 if (TARGET tinyusb_device)
 # rest of your project
-    add_executable(main
+    add_executable(taiko
         src/main.c
         src/spi.c
         src/settings.c
@@ -24,16 +24,16 @@ if (TARGET tinyusb_device)
         src/tinyusb/usb_descriptors.c
     )
 
-    target_include_directories(main PRIVATE src src/tinyusb)
+    target_include_directories(taiko PRIVATE src src/tinyusb)
 
 # Add pico_stdlib library which aggregates commonly used features
-    target_link_libraries(main pico_stdio pico_stdlib pico_bootrom tinyusb_device tinyusb_board pico_multicore hardware_spi hardware_flash)
+    target_link_libraries(taiko pico_stdio pico_stdlib pico_bootrom tinyusb_device tinyusb_board pico_multicore hardware_spi hardware_flash)
 
-    pico_enable_stdio_usb(main 0)
-    pico_enable_stdio_uart(main 0)
+    pico_enable_stdio_usb(taiko 0)
+    pico_enable_stdio_uart(taiko 0)
 
 # create map/bin/hex/uf2 file in addition to ELF.
-    pico_add_extra_outputs(main)
+    pico_add_extra_outputs(taiko)
 
 elseif(PICO_ON_DEVICE)
     message(WARNING "not building hello_usb because TinyUSB submodule is not initialized in
